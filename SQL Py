@@ -1,0 +1,49 @@
+import sqlite3
+
+def one_table_database():
+    conn = sqlite3.connect('towed-car.db')
+    cursor = conn.cursor()
+    sql = "CREATE TABLE db_table (Month int, Day int, Year int, Make text, Style text, Model text, Color text, Plate text, State text, Towed_to_Address text)"
+    cursor.execute(sql)
+    cursor.close()
+
+def add_towed_vehicles_data_to_database():
+    conn = sqlite3.connect('towed-car.db')
+    cursor = conn.cursor()
+    with open("C:/Users/xavie/.PyCharmCE2019.1/config/scratches/towed_vehicles_city_of_chicago.csv", "r") as f:
+       for line in f:
+           if not line.startswith("Tow Date"):
+               L = line.split(",")
+               Date = L[0].split("/")
+               Month = int(Date[0])
+               Day = int(Date[1])
+               Year = int(Date[2])
+               Make = L[1]
+               Style = L[2]
+               Model = L[3]
+               Color = L[4]
+               Plate = L[5]
+               State = L[6]
+               Towed_to_Address = L[7]
+               sql = "INSERT INTO db_table (Month, Day, Year, Make, Style, Model, Color, Plate, State, Towed_to_Address) VALUES (:Month, :Day, :Year, :Make, :Style, :Model, :Color, :Plate, :State, :Towed_to_Address)"
+               cursor.execute(sql, {"Month": Month, "Day": Day, "Year": Year, "Make":Make, "Style":Style, "Model":Model, "Color":Color, "Plate":Plate, "State":State, "Towed_to_Address":Towed_to_Address})
+               conn.commit()
+    cursor.close()
+
+def display_all_db_data():
+    conn = sqlite3.connect('towed-car.db')
+    cursor = conn.cursor()
+    sql = "SELECT DISTINCT Month, Count(Month) AS MOST_FREQUENT FROM db_table where Plate != ''" # use SQL to navigate table
+    columns = cursor.execute(sql)
+    all_entries = columns.fetchall()
+    for entry in all_entries:
+        print(entry)
+
+
+def main():
+    ''' Run Them Once
+    one_table_database()
+    add_towed_vehicles_data_to_database() # Takes quite a bit of time to add all of the data to the table.
+    '''
+    display_all_db_data()
+main()
